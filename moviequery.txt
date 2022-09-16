@@ -1,0 +1,149 @@
+
+select title
+from Movie
+where director='Steven Spielberg';
+---
+select distinct year
+from Movie
+join Rating
+on Movie.mID=Rating.mID
+where stars in (4,5)
+order by year;
+--
+select title
+from Movie
+ left join Rating
+on Movie.mID=Rating.mID
+where Rating.stars IS NULL;
+
+--
+select name
+from Reviewer
+left join Rating
+on Reviewer.rID=Rating.rID
+where ratingDate is null;
+
+--
+select name,title,stars,ratingDate
+from Rating 
+join Reviewer 
+on Rating.rID=Reviewer.rID
+join Movie
+on Rating.mID=Movie.mID
+order by name,title,stars;
+
+-- 
+SELECT R.name, M.title
+FROM Rating AS RatingLatest
+JOIN Rating AS R2 
+ON RatingLatest.rID = R2.rID AND RatingLatest.mID = R2.mID
+JOIN Reviewer AS R USING (rID)
+JOIN Movie AS M USING (mID)
+-- Check if there is a newer rating with more stars than the previous one 
+WHERE RatingLatest.ratingDate > R2.ratingDate 
+AND RatingLatest.stars > R2.stars ;
+
+-- select Movie.title, Max(stars)
+from Rating
+join Movie 
+on Rating.mID=Movie.mID
+group by Movie.title
+order by Movie.title;
+
+---
+select title,(Max(stars) -Min(stars)) as 'Rating Spread'
+from Movie
+join Rating using(mID)
+group by Movie.mID
+order by (Max(stars) -Min(stars)) DESC,title ;
+
+SELECT AVG(Before1980.avg) - AVG(After1980.avg)
+FROM (
+  SELECT AVG(stars) AS avg
+  FROM Movie
+  INNER JOIN Rating USING(mId)
+  WHERE year < 1980
+  GROUP BY mId
+) AS Before1980, (
+  SELECT AVG(stars) AS avg
+  FROM Movie
+  INNER JOIN Rating USING(mId)
+  WHERE year > 1980
+  GROUP BY mId
+) AS After1980;
+
+--select distinct name
+from Rating
+join Reviewer using(rID)
+join Movie using(mID)
+where title='Gone with the Wind'
+
+-- select Reviewer.name,Movie.title,Rating.stars
+from Rating
+join Reviewer using(rID)
+join Movie using(mID)
+where Reviewer.name=Movie.director;
+
+--
+SELECT title FROM Movie
+UNION
+SELECT name FROM Reviewer
+ORDER BY name, title;
+
+--
+select title 
+from Movie
+where mID not IN (
+select mID
+	from Rating
+	where rID=205
+);
+-- 
+select distinct R1.name,R2.name
+from Rating as rla
+join Rating 
+join  Reviewer as R1 using(rID)
+join Reviewer as R2  using(rID)
+where rla.mID=Rating.mID and rla.rID=Rating.rID;
+
+-- 
+select distinct Reviewer.name,Movie.title,Min(stars) as Stars
+from Rating
+join Reviewer using(rID)
+join Movie using(mID)
+group by Rating.mID
+order by Stars 
+limit 4;
+
+--
+select Movie.title, avg(stars) as str
+from Movie
+join Rating using(mID)
+group by mID
+order by str desc;
+
+--
+select Reviewer.name
+from Reviewer
+where rID in(select rID
+	   from Rating
+	   where stars>=3);
+;
+
+--
+select title,director
+from Movie where director not in(
+select director
+from Movie
+group by director
+having count(director)=1)
+order by director, title
+;
+select title,director,count(director) as ct
+from Movie
+where (select count(*) from Movie
+	   where 
+group by title
+order by count(director) desc
+;
+
